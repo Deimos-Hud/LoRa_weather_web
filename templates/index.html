@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            background-color: #add8e6; /* Light blue background for the page */
+        }
+        table {
+            width: 80%;
+            margin: 0 auto; /* Center the table */
+            border-collapse: collapse; /* Ensures that the borders of the cells are merged */
+            background-color: #f0f0f0; /* Background color for the table */
+        }
+        th, td {
+            text-align: center; /* Center-align text in table headers and cells */
+            border: 1px solid black; /* Add border to table cells */
+            padding: 8px; /* Add some padding inside table cells */
+        }
+        tr:nth-child(even) {
+            background-color: #d0e0f0; /* Alternating row color */
+        }
+        .weather-icon {
+            width: 50px;
+            height: auto;
+        }
+        canvas {
+            background-color: #fff; /* White background for the canvas */
+            border: 1px solid #ddd; /* Light border for the canvas */
+            margin-top: 20px; /* Spacing above the canvas */
+        }
+        /* Additional styles can be added here */
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>High Temperature (°C)</th>
+            <th>Low Temperature (°C)</th>
+            <th>Rain Chance</th>
+            <th>Weather Icon</th>
+        </tr>
+        <!-- The table rows will be filled in by JavaScript using data from 'pc_weather_data.json' -->
+    </table>
+
+    <div>
+        <canvas id="tempChart" width="250" height="50"></canvas>
+    </div>
+
+    <script>
+        fetch('/weather_data')
+            .then(response => response.json())
+            .then(data => {
+                // Render the chart using Chart.js
+                const ctx = document.getElementById('tempChart').getContext('2d');
+                const tempChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [{
+                            label: 'High',
+                            data: data.highs,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        }, {
+                            label: 'Low',
+                            data: data.lows,
+                            borderColor: 'rgb(54, 162, 235)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+
+                // Populate the table with weather data and icons
+                const table = document.querySelector('table');
+                data.dates.forEach((date, index) => {
+                    const row = table.insertRow();
+                    row.innerHTML = `
+                        <td>${date}</td>
+                        <td>${data.highs[index]}</td>
+                        <td>${data.lows[index]}</td>
+                        <td>${data.rain_chance[index]}</td>
+                        <td><img src="static/${data.rain_chance[index] === 'No' ? 'sunny.png' : 'rainy.png'}" class="weather-icon"></td>
+                    `;
+                });
+            });
+    </script>
+</body>
+</html>
