@@ -17,12 +17,19 @@ def weather_data():
             return jsonify({'dates': dates, 'highs': highs, 'lows': lows, 'rain_chance': rain_chance})
     except FileNotFoundError:
         abort(500, 'Weather data file not found')
-        
+
 @app.route('/')
 def index():
     city = request.args.get('city')
+    print(city)
+    
     if city is None:
         abort(400, 'Missing argument city')
+    
+    # Save the value of city to a txt file
+    with open('city_value.txt', 'w') as txt_file:
+        txt_file.write(str(city))
+    
     return render_template('index.html', title='Weather App')
 
 if __name__ == '__main__':
